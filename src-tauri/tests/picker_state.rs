@@ -2,6 +2,7 @@
 // License: GNU GPLv3 or later. See the license file in the project root for more information.
 // Copyright © 2021 - present Aleksey Hoffman. All rights reserved.
 
+use sigma_file_manager_lib::picker::SigmaPicker;
 use sigma_file_manager_lib::picker_state::PickerRegistry;
 use std::path::PathBuf;
 
@@ -48,4 +49,16 @@ fn update_folder_on_unknown_handle_returns_error() {
     reg.unregister(&stale);
     let result = reg.update_folder(&stale, PathBuf::from("C:/Windows"));
     assert!(result.is_err());
+}
+
+#[test]
+fn sigma_picker_stores_initial_folder() {
+    let picker = SigmaPicker::new(PathBuf::from("C:/foo")).unwrap();
+    assert_eq!(picker.current_folder(), PathBuf::from("C:/foo").as_path());
+}
+
+#[test]
+fn sigma_picker_hwnd_is_none_before_show() {
+    let picker = SigmaPicker::new(PathBuf::from("C:/foo")).unwrap();
+    assert!(picker.hwnd().is_none());
 }

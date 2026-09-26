@@ -23,6 +23,7 @@ mod link_operations;
 mod open_with;
 mod process_runner;
 mod startup_storage_bootstrap;
+pub mod picker;
 pub mod picker_state;
 mod system_clipboard;
 mod system_icons;
