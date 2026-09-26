@@ -257,3 +257,24 @@ pub async fn picker_close(handle: String, app: AppHandle) -> Result<Option<Strin
         Err("picker_close is only supported on Windows".to_string())
     }
 }
+
+/// Manual smoke-test entry point (Task 10).
+///
+/// Forwards to [`picker_open`] with a hard-coded starting folder so a human
+/// (or a frontend devtools console) can exercise the full picker flow —
+/// `picker_open` -> `picker_set_folder` (via navigator focus return or
+/// explicit invoke) -> `picker_close` — without first having to migrate the
+/// production `sigma.dialog.openFile` call site to the new picker pipeline.
+///
+/// Kept as a separate command so it can be granted its own narrow permission
+/// (`allow-picker-open-test`) and revoked independently of the production
+/// `picker_open` if the smoke-test surface ever needs to be stripped for a
+/// release build.
+#[tauri::command]
+pub async fn picker_open_test(app: AppHandle) -> Result<String, String> {
+    // Forward to the real `picker_open`. The starting folder is intentionally
+    // hard-coded: this command exists so an operator can validate the picker
+    // end-to-end without having to thread a path argument through every
+    // shell that might invoke it.
+    picker_open("C:/Users".to_string(), app).await
+}

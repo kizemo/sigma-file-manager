@@ -6,8 +6,18 @@
 # Tauri 2.x capability system: the permissions defined here are referenced by
 # identifier from src-tauri/capabilities/default.json.
 #
-# The permission identifier prefix (`sigma-file-manager`) is the Cargo package
-# name declared in src-tauri/Cargo.toml.
+# IMPORTANT — identifier shape for APP-level commands in Tauri 2.x:
+#   - The TOML `identifier` field is the *base* name only (no package prefix).
+#   - The reference in `capabilities/default.json` is the same base name,
+#     without any prefix. Tauri 2.x's `validate_capabilities` (acl.rs:372-376)
+#     uses an empty prefix when the manifest key is `APP_ACL_KEY`
+#     (= "__app-acl__"), and `get_prefix()` (identifier.rs:69) returns `None`
+#     for unprefixed identifiers, causing the lookup to fall back to the app
+#     manifest. Plugin-level permissions (e.g. `dialog:allow-open`) DO carry
+#     their plugin name as prefix; app-level ones do not.
+#   - Earlier drafts prefixed these references with `sigma-file-manager:` —
+#     that pattern is wrong for app-level commands and fails the build with
+#     `Permission sigma-file-manager:allow-picker-open not found`.
 
 [[permission]]
 identifier = "allow-picker-open"
@@ -23,3 +33,8 @@ commands.allow = ["picker_set_folder"]
 identifier = "allow-picker-close"
 description = "Enables the picker_close command without any pre-configured scope."
 commands.allow = ["picker_close"]
+
+[[permission]]
+identifier = "allow-picker-open-test"
+description = "Enables the picker_open_test smoke-test command (Task 10). Hard-codes the starting folder to C:/Users and forwards to picker_open. Safe to revoke for release builds."
+commands.allow = ["picker_open_test"]

@@ -421,6 +421,7 @@ pub fn run() {
             commands_picker::picker_open,
             commands_picker::picker_set_folder,
             commands_picker::picker_close,
+            commands_picker::picker_open_test,
         ])
         .setup(setup_handler)
         .on_window_event(|window, event| {

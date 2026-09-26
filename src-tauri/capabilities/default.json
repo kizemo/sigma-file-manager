@@ -64,8 +64,9 @@
     "clipboard-manager:allow-read-text",
     "clipboard-manager:allow-read-image",
     "autostart:default",
-    "sigma-file-manager:allow-picker-open",
-    "sigma-file-manager:allow-picker-set-folder",
-    "sigma-file-manager:allow-picker-close"
+    "allow-picker-open",
+    "allow-picker-set-folder",
+    "allow-picker-close",
+    "allow-picker-open-test"
   ]
 }
