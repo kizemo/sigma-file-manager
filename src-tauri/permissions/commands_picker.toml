@@ -1,0 +1,25 @@
+# Permissions for Sigma's native file picker (IFileDialog COM wrapper).
+#
+# These commands are defined in src-tauri/src/commands_picker.rs and registered
+# in src-tauri/src/lib.rs via tauri::generate_handler![...]. For the frontend
+# to be allowed to invoke them at runtime they must be exposed through the
+# Tauri 2.x capability system: the permissions defined here are referenced by
+# identifier from src-tauri/capabilities/default.json.
+#
+# The permission identifier prefix (`sigma-file-manager`) is the Cargo package
+# name declared in src-tauri/Cargo.toml.
+
+[[permission]]
+identifier = "allow-picker-open"
+description = "Enables the picker_open command without any pre-configured scope."
+commands.allow = ["picker_open"]
+
+[[permission]]
+identifier = "allow-picker-set-folder"
+description = "Enables the picker_set_folder command without any pre-configured scope."
+commands.allow = ["picker_set_folder"]
+
+[[permission]]
+identifier = "allow-picker-close"
+description = "Enables the picker_close command without any pre-configured scope."
+commands.allow = ["picker_close"]
