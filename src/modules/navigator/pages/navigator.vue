@@ -14,12 +14,14 @@ import {
   nextTick,
   type Ref,
 } from 'vue';
+import { getCurrentWindow } from '@tauri-apps/api/window';
 import { useI18n } from 'vue-i18n';
 import { TabBar } from '@/modules/tab-bar';
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable';
 import { useWorkspacesStore } from '@/stores/storage/workspaces';
 import { useUserSettingsStore } from '@/stores/storage/user-settings';
 import { useClipboardStore } from '@/stores/runtime/clipboard';
+import { useDialogPickerStore } from '@/stores/runtime/dialog-picker';
 import { useDismissalLayerStore } from '@/stores/runtime/dismissal-layer';
 import { useGlobalSearchStore } from '@/stores/runtime/global-search';
 import { useShortcutsStore, getSelectedTextForCopy } from '@/stores/runtime/shortcuts';
@@ -54,6 +56,7 @@ import { useNavigatorFolderSettings } from '@/modules/navigator/composables/use-
 
 import { useIsSmallScreen } from '@/composables/use-responsive-query';
 import { useFileDropOperation } from '@/composables/use-file-drop-operation';
+import { useCurrentNavigatorPath } from '@/composables/use-current-navigator-path';
 import { provideNavigatorImageThumbnails } from '@/modules/navigator/composables/use-navigator-image-thumbnails';
 import { arePathsEquivalent, getParentPath } from '@/utils/file-operation-paths';
 import {
@@ -107,6 +110,8 @@ const terminalsStore = useTerminalsStore();
 const dirSizesStore = useDirSizesStore();
 provideNavigatorImageThumbnails();
 const navigatorSelectionStore = useNavigatorSelectionStore();
+const dialogPicker = useDialogPickerStore();
+const navigatorPath = useCurrentNavigatorPath();
 const { t } = useI18n();
 const activeFileBrowserDragState = useActiveFileBrowserDragState();
 const {
@@ -1165,9 +1170,44 @@ watch(isInfoPanelVisibilityAnimating, (isAnimating, wasAnimating) => {
   }
 });
 
+// Sync the open native file dialog (dialog picker) to navigator navigation.
+// While the picker is open, any path change in the main window — or a return of
+// focus from the picker — should push the new folder into the picker so its
+// initial directory stays in sync. Both triggers are guarded by an equality
+// check against the picker's lastKnownFolder, so double-fires are safe.
+let pickerFocusUnlisten: (() => void) | null = null;
+
+watch(navigatorPath, async (newPath) => {
+  if (!dialogPicker.activeHandle) return;
+  if (!newPath) return;
+  if (newPath === dialogPicker.lastKnownFolder) return;
+  try {
+    await dialogPicker.setFolder(newPath);
+  }
+  catch (err) {
+    console.error('[dialog-picker] setFolder failed:', err);
+  }
+});
+
 onMounted(async () => {
   registerShortcutHandlers();
   dirSizesStore.recoverActiveCalculations();
+
+  try {
+    pickerFocusUnlisten = await getCurrentWindow().onFocusChanged(({ payload: focused }) => {
+      if (!focused) return;
+      if (!dialogPicker.activeHandle) return;
+      const currentPath = navigatorPath.value;
+      if (!currentPath) return;
+      if (currentPath === dialogPicker.lastKnownFolder) return;
+      void dialogPicker.setFolder(currentPath).catch((err) => {
+        console.error('[dialog-picker] setFolder on focus failed:', err);
+      });
+    });
+  }
+  catch (err) {
+    console.error('[dialog-picker] focus listener setup failed:', err);
+  }
 
   if (!consumeNavigatorLayoutResetPending()) {
     return;
@@ -1182,6 +1222,10 @@ onMounted(async () => {
 onUnmounted(() => {
   navigatorSelectionStore.setSelectedDirEntries([]);
   clearPanelRefs();
+  if (pickerFocusUnlisten) {
+    pickerFocusUnlisten();
+    pickerFocusUnlisten = null;
+  }
 });
 </script>
 
