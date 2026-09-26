@@ -77,7 +77,6 @@ encoding_rs = "0.8"
 dunce = "1"
 arboard = "3.6.1"
 uuid = { version = "1", features = ["v4"] }
-parking_lot = "0.12"
 
 # TODO: Remove this patch once drag-rs ships a fix for network-path outbound drag on Windows.
 # Upstream: https://github.com/crabnebula-dev/drag-rs/issues/72

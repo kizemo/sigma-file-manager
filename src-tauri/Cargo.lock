@@ -5342,7 +5342,6 @@ dependencies = [
  "mime_guess",
  "notify",
  "once_cell",
- "parking_lot",
  "png 0.18.1",
  "rayon",
  "rcgen",

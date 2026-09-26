@@ -1,4 +1,8 @@
-use sigma_file_manager_lib::picker_state::{PickerHandle, PickerRegistry};
+// SPDX-License-Identifier: GPL-3.0-or-later
+// License: GNU GPLv3 or later. See the license file in the project root for more information.
+// Copyright © 2021 - present Aleksey Hoffman. All rights reserved.
+
+use sigma_file_manager_lib::picker_state::PickerRegistry;
 use std::path::PathBuf;
 
 #[test]
@@ -38,7 +42,10 @@ fn unregister_removes_handle() {
 #[test]
 fn update_folder_on_unknown_handle_returns_error() {
     let reg = PickerRegistry::new();
-    let fake = PickerHandle(uuid::Uuid::new_v4());
-    let result = reg.update_folder(&fake, PathBuf::from("C:/"));
+    // Forging a stale handle via the public API: register then unregister leaves
+    // a structurally-valid PickerHandle that no longer maps to any state.
+    let stale = reg.register(PathBuf::from("C:/"));
+    reg.unregister(&stale);
+    let result = reg.update_folder(&stale, PathBuf::from("C:/Windows"));
     assert!(result.is_err());
 }
