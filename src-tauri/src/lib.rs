@@ -25,6 +25,7 @@ mod process_runner;
 mod startup_storage_bootstrap;
 pub mod picker;
 pub mod picker_state;
+pub mod commands_picker;
 mod system_clipboard;
 mod system_icons;
 mod system_tray;
@@ -222,6 +223,7 @@ fn get_launch_context() -> LaunchContext {
 pub fn run() {
     tauri::Builder::default()
         .manage(startup_storage_bootstrap::StartupStorageBootstrapState::default())
+        .manage(commands_picker::build_picker_worker())
         .plugin(tauri_plugin_single_instance::init(|app, argv, cwd| {
             #[cfg(windows)]
             {
@@ -416,6 +418,9 @@ pub fn run() {
             lan_share::start_lan_share,
             lan_share::stop_lan_share,
             lan_share::get_local_ip,
+            commands_picker::picker_open,
+            commands_picker::picker_set_folder,
+            commands_picker::picker_close,
         ])
         .setup(setup_handler)
         .on_window_event(|window, event| {

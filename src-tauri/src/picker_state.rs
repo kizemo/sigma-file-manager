@@ -15,6 +15,20 @@ impl PickerHandle {
     pub fn new() -> Self {
         Self(Uuid::new_v4())
     }
+
+    /// Wrap an externally-provided UUID (e.g. one parsed from a Tauri command
+    /// argument). Used by command-layer code that receives the handle as a
+    /// string and needs to reconstruct the typed handle before dispatching
+    /// to the picker worker.
+    pub fn from_uuid(uuid: Uuid) -> Self {
+        Self(uuid)
+    }
+
+    /// Borrow the underlying UUID (e.g. for serializing back to a string
+    /// when returning a handle from a command).
+    pub fn as_uuid(&self) -> Uuid {
+        self.0
+    }
 }
 
 #[derive(Debug)]
