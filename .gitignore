@@ -33,3 +33,8 @@ flatpak/.deb-input/
 flatpak/.build/
 flatpak/.repo/
 flatpak/output/
+
+# Release artifacts — local mirror of GitHub Releases; do NOT commit
+# binaries to git. Use `gh release` (or pull from GitHub Releases page) for
+# the canonical copy. Local copies live in `release/` for offline use.
+release/

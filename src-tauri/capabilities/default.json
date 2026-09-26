@@ -63,10 +63,6 @@
     "clipboard-manager:allow-write-image",
     "clipboard-manager:allow-read-text",
     "clipboard-manager:allow-read-image",
-    "autostart:default",
-    "allow-picker-open",
-    "allow-picker-set-folder",
-    "allow-picker-close",
-    "allow-picker-open-test"
+    "autostart:default"
   ]
 }
