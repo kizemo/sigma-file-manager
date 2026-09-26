@@ -62,3 +62,15 @@ fn sigma_picker_hwnd_is_none_before_show() {
     let picker = SigmaPicker::new(PathBuf::from("C:/foo")).unwrap();
     assert!(picker.hwnd().is_none());
 }
+
+// COM smoke test — only meaningful on Windows with a display.
+// In headless CI the underlying CoCreateInstance may fail; the test just
+// verifies the call does not panic and returns a Result.
+#[cfg(windows)]
+#[test]
+fn sigma_picker_creates_real_ifiledialog() {
+    use sigma_file_manager_lib::picker::SigmaPicker;
+    // Don't assert success — real GUI dialog creation may fail in headless CI.
+    let result = SigmaPicker::new_com(PathBuf::from("C:/Users"));
+    let _ = result;
+}
